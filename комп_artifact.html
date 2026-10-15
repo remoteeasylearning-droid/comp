@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Космічний квест: Втеча з небезпечної планети</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #0b0f19 0%, #1a1025 50%, #0a192f 100%);
+            color: #ffffff;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #stars-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration) ease-in-out infinite alternate;
+            opacity: 0.3;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.2; transform: scale(0.8); box-shadow: 0 0 2px rgba(255,255,255,0.2); }
+            100% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 8px rgba(255,255,255,0.8); }
+        }
+
+        .glass-panel {
+            background: rgba(20, 25, 45, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-sci-fi {
+            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn-sci-fi::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: all 0.4s ease;
+            z-index: -1;
+        }
+
+        .btn-sci-fi:hover::before {
+            left: 100%;
+        }
+
+        .btn-sci-fi:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hidden-state {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="stars-container"></div>
+
+    <div class="w-full max-w-3xl p-4 md:p-8">
+        <div class="glass-panel rounded-3xl p-6 md:p-10 relative overflow-hidden text-center">
+            
+            <!-- Декоративні елементи панелі -->
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+            
+            <!-- Екран 1: Старт -->
+            <div id="screen-start" class="fade-in">
+                <div class="text-5xl mb-4">🚀</div>
+                <h1 class="text-3xl md:text-5xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                    Втеча з небезпечної планети
+                </h1>
+                <p class="text-lg md:text-xl text-gray-300 mb-8 leading-relaxed">
+                    Увага, капітане! Наш зореліт здійснив аварійну посадку. 
+                    Щоб полагодити корабель і полетіти додому, тобі потрібно допомогти бортовому комп'ютеру правильно розподілити пам'ять!
+                </p>
+                <button onclick="startGame()" class="btn-sci-fi text-white font-bold py-4 px-10 rounded-full text-xl uppercase tracking-wider">
+                    Почати місію
+                </button>
+            </div>
+
+            <!-- Екран 2: Ігровий процес -->
+            <div id="screen-game" class="hidden-state fade-in">
+                <div class="flex justify-between items-center mb-6 text-sm md:text-base font-bold text-gray-400">
+                    <span id="mission-status">Місія: 1 / 5</span>
+                    <span id="energy-level" class="text-green-400">Енергія: 100%</span>
+                </div>
+
+                <div class="bg-gray-900/50 rounded-2xl p-6 mb-8 border border-gray-700">
+                    <div id="situation-icon" class="text-4xl mb-4">🛸</div>
+                    <h2 id="situation-text" class="text-xl md:text-2xl font-bold mb-2">Завантаження ситуації...</h2>
+                </div>
+
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <!-- Кнопки варіантів будуть додані через JS -->
+                </div>
+
+                <!-- Вікно результату після вибору -->
+                <div id="feedback-box" class="hidden-state rounded-2xl p-5 mb-6 fade-in border">
+                    <h3 id="feedback-title" class="text-2xl font-bold mb-2"></h3>
+                    <p id="feedback-text" class="text-lg"></p>
+                    <button onclick="nextStep()" id="next-btn" class="mt-4 bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold py-2 px-6 rounded-full transition-all">
+                        Далі ➔
+                    </button>
+                </div>
+            </div>
+
+            <!-- Екран 3: Завершення (Перемога) -->
+            <div id="screen-end" class="hidden-state fade-in">
+                <div class="text-6xl mb-4">🌟</div>
+                <h1 class="text-4xl font-black mb-4 text-green-400">Місію виконано!</h1>
+                <p class="text-lg md:text-xl text-gray-300 mb-6">
+                    Вітаю, капітане! Ти ідеально налаштував системи пам'яті, і наш зореліт успішно вирвався з небезпечної планети. 
+                    Ти справжній геній комп'ютерних технологій!
+                </p>
+                <div class="bg-blue-900/40 border border-blue-500/50 rounded-xl p-5 mb-8 text-left inline-block w-full text-blue-100">
+                    <span class="font-bold text-blue-300 block mb-2">💡 Порада від бортового комп'ютера:</span>
+                    Завжди зберігай свої найважливіші файли та малюнки на накопичувач (SSD/HDD), щоб ніякі космічні магнітні бурі не змогли їх стерти!
+                </div>
+                <button onclick="location.reload()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-full transition-all">
+                    Зіграти ще раз
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Генерація зірок на фоні
+        const starsContainer = document.getElementById('stars-container');
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.width = Math.random() * 3 + 1 + 'px';
+            star.style.height = star.style.width;
+            star.style.left = Math.random() * 100 + 'vw';
+            star.style.top = Math.random() * 100 + 'vh';
+            star.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
+            star.style.animationDelay = Math.random() * 5 + 's';
+            starsContainer.appendChild(star);
+        }
+
+        // Дані квесту
+        const questData = [
+            {
+                icon: "🗺️",
+                text: "Ми знайшли координати безпечного шляху додому! Їх треба надійно зберегти, як у міцному сейфі, щоб вони залишились навіть якщо ми вимкнемо двигуни. Що використаємо?",
+                options: ["Флешку", "Оперативну пам'ять (RAM)", "Накопичувач (SSD/HDD)"],
+                correct: 2,
+                explanation: "Накопичувач (SSD або HDD) — це головний сейф комп'ютера, де дані зберігаються надійно і назавжди."
+            },
+            {
+                icon: "🤖",
+                text: "Біля нашого корабля лежить розбитий дрон-розвідник. Нам потрібно дістати з нього секретні коди і перенести до головного комп'ютера у твоїй кишені. Що для цього підійде найкраще?",
+                options: ["Накопичувач (SSD/HDD)", "Флешка", "Оперативна пам'ять (RAM)"],
+                correct: 1,
+                explanation: "Флешка — це маленька кишенькова пам'ять, якою дуже зручно переносити файли між комп'ютерами."
+            },
+            {
+                icon: "☄️",
+                text: "Ми злітаємо! Але попереду пояс метеоритів. Бортовому комп'ютеру потрібно дуже-дуже швидко рахувати, куди повернути просто зараз. Яку пам'ять ми маємо підсилити для швидких розрахунків?",
+                options: ["Оперативну пам'ять (RAM)", "Флешку", "Накопичувач (SSD/HDD)"],
+                correct: 0,
+                explanation: "Оперативна пам'ять (RAM) — це найшвидша пам'ять, яка допомагає комп'ютеру думати і працювати прямо в цю секунду."
+            },
+            {
+                icon: "⚡",
+                text: "Обережно! Насувається магнітна буря, і світло на кораблі може на секунду зникнути. Яка пам'ять миттєво «забуде» все, що в ній є, якщо пропаде струм?",
+                options: ["Накопичувач (SSD/HDD)", "Флешка", "Оперативна пам'ять (RAM)"],
+                correct: 2,
+                explanation: "Оперативна пам'ять (RAM) працює тільки тоді, коли є світло, тому без струму вона одразу все забуває."
+            },
+            {
+                icon: "📚",
+                text: "Ура, ми в безпеці! Ми зібрали гігантську бібліотеку знань про цю планету і хочемо зберегти ці файли назавжди на кораблі. Де зберігаються всі-всі програми та файли?",
+                options: ["Накопичувач (SSD/HDD)", "Оперативна пам'ять (RAM)", "Флешка"],
+                correct: 0,
+                explanation: "Всі твої ігри, фотографії та мультики завжди лежать на великому накопичувачі (SSD або HDD), як на полицях бібліотеки."
+            }
+        ];
+
+        let currentStep = 0;
+        let canClick = true;
+
+        // Елементи DOM
+        const screenStart = document.getElementById('screen-start');
+        const screenGame = document.getElementById('screen-game');
+        const screenEnd = document.getElementById('screen-end');
+        
+        const missionStatus = document.getElementById('mission-status');
+        const situationIcon = document.getElementById('situation-icon');
+        const situationText = document.getElementById('situation-text');
+        const optionsContainer = document.getElementById('options-container');
+        
+        const feedbackBox = document.getElementById('feedback-box');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackText = document.getElementById('feedback-text');
+
+        // Функції гри
+        function startGame() {
+            screenStart.classList.add('hidden-state');
+            screenGame.classList.remove('hidden-state');
+            currentStep = 0;
+            loadSituation();
+        }
+
+        function loadSituation() {
+            canClick = true;
+            feedbackBox.classList.add('hidden-state');
+            optionsContainer.classList.remove('hidden-state');
+            optionsContainer.innerHTML = ''; // Очищаємо старі кнопки
+            
+            const currentData = questData[currentStep];
+            missionStatus.innerText = `Місія: ${currentStep + 1} / ${questData.length}`;
+            situationIcon.innerText = currentData.icon;
+            situationText.innerText = currentData.text;
+
+            currentData.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'bg-gray-800 hover:bg-blue-600/50 border border-gray-600 hover:border-blue-400 text-white font-bold py-4 px-4 rounded-xl transition-all shadow-lg transform hover:-translate-y-1';
+                btn.innerText = option;
+                btn.onclick = () => handleChoice(index);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function handleChoice(selectedIndex) {
+            if (!canClick) return;
+            canClick = false;
+
+            const currentData = questData[currentStep];
+            const isCorrect = selectedIndex === currentData.correct;
+            
+            optionsContainer.classList.add('hidden-state');
+            feedbackBox.classList.remove('hidden-state');
+
+            // Змінюємо стилі залежно від правильності
+            if (isCorrect) {
+                feedbackBox.className = 'rounded-2xl p-5 mb-6 fade-in border border-green-500 bg-green-900/30';
+                feedbackTitle.innerHTML = '✅ Правильне рішення!';
+                feedbackTitle.className = 'text-2xl font-bold mb-2 text-green-400';
+            } else {
+                feedbackBox.className = 'rounded-2xl p-5 mb-6 fade-in border border-yellow-500 bg-yellow-900/30';
+                feedbackTitle.innerHTML = '⚠️ Майже вгадали!';
+                feedbackTitle.className = 'text-2xl font-bold mb-2 text-yellow-400';
+            }
+
+            feedbackText.innerText = currentData.explanation;
+        }
+
+        function nextStep() {
+            currentStep++;
+            if (currentStep < questData.length) {
+                loadSituation();
+            } else {
+                finishGame();
+            }
+        }
+
+        function finishGame() {
+            screenGame.classList.add('hidden-state');
+            screenEnd.classList.remove('hidden-state');
+        }
+    </script>
+</body>
+</html>
